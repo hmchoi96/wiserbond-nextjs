@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
-import { evaluateForecastAccuracy } from "./recapUtils";
-import { getActualOutcome } from "./getActualOutcome"; // 이건 나중에 구현
-import { Database } from "@/types/supabase"; // Supabase 타입 정리용
+import { evaluateForecastAccuracy } from "./recap/recapEvaluator";
+import { getActualOutcome } from "./getActualOutcome";
+
 
 const db = supabase;
 
