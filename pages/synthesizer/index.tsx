@@ -1,115 +1,95 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+// pages/synthesizer/index.tsx
+import { useState } from "react";
+import ReportSection from "@/components/ReportSection"; // ✅ 이건 파일 최상단에 위치해야 함
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+export default function SynthesizerPage() {
+  const [topic, setTopic] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [country, setCountry] = useState("");
+  const [language, setLanguage] = useState("English");
+  const [isPro, setIsPro] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState({
+    exec_summary: "",
+    big: "",
+    mid: "",
+    small: "",
+    interpretation: ""
+  });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  const handleGenerate = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, industry, country, language, isPro })
+      });
 
-export default function Home() {
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      console.error("Generation failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Wiserbond Synthesizer</h1>
+
+      <div className="space-y-4">
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="Topic (e.g. Inflation)"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
         />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="Industry (e.g. Supply Chain)"
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+        />
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="Country (e.g. Canada)"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+        />
+        <select
+          className="w-full border p-2 rounded"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          <option value="English">English</option>
+          <option value="Korean">Korean</option>
+          <option value="Spanish">Spanish</option>
+        </select>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={isPro}
+            onChange={() => setIsPro(!isPro)}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          Pro Mode (expert-level explanation)
+        </label>
+        <button
+          onClick={handleGenerate}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          disabled={loading}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {loading ? "Generating..." : "Generate Report"}
+        </button>
+      </div>
+
+      {/* 결과 카드 출력 */}
+      <div className="space-y-4">
+        {Object.entries(result).map(([key, value]) => (
+          <ReportSection key={key} title={key} content={value} />
+        ))}
+      </div>
     </div>
   );
 }
