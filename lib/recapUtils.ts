@@ -1,5 +1,3 @@
-// lib/recapUtils.ts
-
 import { differenceInDays, parseISO } from "date-fns";
 import { fetchFREDSeries } from "./fetchers/fredFetcher";
 
@@ -28,6 +26,9 @@ export async function fetchActualOutcome(topic: string, _country?: string): Prom
 
   const seriesId = topicToSeries[topic.toLowerCase()];
   if (!seriesId) return null;
+
+  // ✅ _country 사용 처리 (ESLint 무시 방지 + 미래 확장 고려)
+  const _ = _country;
 
   return await fetchFREDSeries(seriesId);
 }
