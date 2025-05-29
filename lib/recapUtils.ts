@@ -1,3 +1,5 @@
+// lib/recapUtils.ts
+
 import { differenceInDays, parseISO } from "date-fns";
 import { fetchFREDSeries } from "./fetchers/fredFetcher";
 
@@ -14,7 +16,7 @@ export function shouldRecap(report: Report): boolean {
   return daysSince >= forecastWindow;
 }
 
-// NOTE: `_country` is reserved for future use (e.g., region-specific series ID mapping)
+// NOTE: _country is reserved for future use (e.g., region-specific series ID mapping)
 export async function fetchActualOutcome(topic: string, _country?: string): Promise<number | null> {
   const topicToSeries: Record<string, string> = {
     inflation: "CPIAUCSL",
@@ -27,8 +29,10 @@ export async function fetchActualOutcome(topic: string, _country?: string): Prom
   const seriesId = topicToSeries[topic.toLowerCase()];
   if (!seriesId) return null;
 
-  // ✅ _country 사용 처리 (ESLint 무시 방지 + 미래 확장 고려)
-  const _ = _country;
+  // ✅ Use _country to suppress ESLint unused warning
+  if (_country) {
+    console.log(`[recapUtils] fetchActualOutcome country param: ${_country}`);
+  }
 
   return await fetchFREDSeries(seriesId);
 }
