@@ -1,4 +1,3 @@
-// pages/synthesizer/index.tsx
 import { useState } from "react";
 import ReportSection from "@/components/ReportSection";
 
@@ -50,10 +49,19 @@ export default function SynthesizerPage() {
         })
       });
 
-      const data = await res.json();
+      // ✅ Debug: response status + raw body
+      console.log("🔍 Response status:", res.status);
+      const rawText = await res.text();
+      console.log("🔍 Raw Response:", rawText);
+
+      if (!res.ok) {
+        throw new Error(`Server error ${res.status}: ${rawText}`);
+      }
+
+      const data = JSON.parse(rawText); // JSON 안전 파싱
       setResult(data);
     } catch (err) {
-      console.error("Generation failed:", err);
+      console.error("⚠️ Generation failed:", err);
     } finally {
       setLoading(false);
     }
@@ -69,11 +77,11 @@ export default function SynthesizerPage() {
     <div className="min-h-screen bg-[#f4f4f5] text-black">
       <div className="max-w-3xl mx-auto p-6 space-y-6">
         <h1 className="text-2xl font-bold">Wiserbond Synthesizer</h1>
-  
+
         <div className="p-4 border bg-yellow-100 rounded text-sm text-yellow-800">
           This tool tells how a macro topic affects an industry in a country, explained in your preferred language.
         </div>
-  
+
         <div className="space-y-4">
           <label className="block">
             <span className="text-sm font-medium text-black">Macro Topic</span>
@@ -84,7 +92,7 @@ export default function SynthesizerPage() {
               onChange={(e) => setTopic(e.target.value)}
             />
           </label>
-  
+
           <label className="block">
             <span className="text-sm font-medium text-black">Industry/Sector</span>
             <input
@@ -94,7 +102,7 @@ export default function SynthesizerPage() {
               onChange={(e) => setIndustry(e.target.value)}
             />
           </label>
-  
+
           <label className="block">
             <span className="text-sm font-medium text-black">Country</span>
             <input
@@ -104,7 +112,7 @@ export default function SynthesizerPage() {
               onChange={(e) => setCountry(e.target.value)}
             />
           </label>
-  
+
           <details className="border p-3 rounded bg-white text-black">
             <summary className="cursor-pointer font-semibold">Refine your context to get a more focused report (optional)</summary>
             <div className="mt-4 space-y-3">
@@ -128,7 +136,7 @@ export default function SynthesizerPage() {
               />
             </div>
           </details>
-  
+
           <label className="block">
             <span className="text-sm font-medium text-black">Output Language</span>
             <select
@@ -143,7 +151,7 @@ export default function SynthesizerPage() {
               <option value="Chinese">Chinese</option>
             </select>
           </label>
-  
+
           <label className="flex items-center gap-2">
             <span className="text-sm text-black">Turn on Pro Mode for expert-level depth and technical precision (optional)</span>
             <input
@@ -153,7 +161,7 @@ export default function SynthesizerPage() {
             />
             <span className="text-sm text-black">I’m familiar with this industry (Pro mode)</span>
           </label>
-  
+
           <button
             onClick={handleGenerate}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
@@ -162,7 +170,7 @@ export default function SynthesizerPage() {
             {loading ? "Generating your personalized report..." : "Generate Report"}
           </button>
         </div>
-  
+
         <div className="space-y-4">
           {result.cards.map((card) => (
             <ReportSection
@@ -172,7 +180,7 @@ export default function SynthesizerPage() {
               content={card.content}
             />
           ))}
-  
+
           {result.followup && (
             <div className="mt-6 p-4 border border-blue-200 bg-blue-50 rounded text-black">
               <h2 className="font-bold text-lg text-blue-900 mb-2">
