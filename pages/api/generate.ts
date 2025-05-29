@@ -72,11 +72,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     // Step 3: Generate Prompts and Call GPT
-    const [big, mid, small] = await Promise.all([
-      callGPT(getBigPrompt(sharedParams), "gpt-4o"),
-      callGPT(getMidPrompt(sharedParams), "gpt-4o"),
-      callGPT(getSmallPrompt(sharedParams), "gpt-4o")
-    ]);
+    const big = await callGPT(getBigPrompt(sharedParams), "gpt-4o");
+    const mid = await callGPT(getMidPrompt(sharedParams), "gpt-4o");
+    const small = await callGPT(getSmallPrompt(sharedParams), "gpt-4o");
+
 
     const interpretationPrompt = getInterpretationPrompt({
       ...sharedParams,
