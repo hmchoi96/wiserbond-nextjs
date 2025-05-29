@@ -1,5 +1,11 @@
 // lib/gpt.ts
 
+type ChatRequestBody = {
+  model: "gpt-4o" | "o3";
+  messages: { role: "user"; content: string }[];
+  temperature?: number;
+};
+
 export async function callGPT(prompt: string, model: "gpt-4o" | "o3" = "gpt-4o"): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     console.error("❌ Missing OpenAI API Key.");
@@ -11,12 +17,11 @@ export async function callGPT(prompt: string, model: "gpt-4o" | "o3" = "gpt-4o")
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
   };
 
-  const body: any = {
-    model: model,
+  const body: ChatRequestBody = {
+    model,
     messages: [{ role: "user", content: prompt }]
   };
 
-  // Only apply temperature for gpt-4o
   if (model === "gpt-4o") {
     body.temperature = 0.7;
   }
@@ -35,13 +40,12 @@ export async function callGPT(prompt: string, model: "gpt-4o" | "o3" = "gpt-4o")
       return "⚠️ No valid response from GPT.";
     }
 
-    // Optional: short debug preview
     console.log("✅ GPT model:", model);
     console.log("🧠 Prompt preview:", prompt.slice(0, 100));
     console.log("📝 Response preview:", data.choices[0].message.content.slice(0, 100));
 
     return data.choices[0].message.content;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ GPT API call failed:", error);
     return "⚠️ GPT request failed.";
   }

@@ -3,7 +3,12 @@
 import { differenceInDays, parseISO } from "date-fns";
 import { fetchFREDSeries } from "./fetchers/fredFetcher";
 
-export function shouldRecap(report: any): boolean {
+type Report = {
+  created_at: string;
+  forecast_window?: string;
+};
+
+export function shouldRecap(report: Report): boolean {
   const today = new Date();
   const created = parseISO(report.created_at);
   const forecastWindow = parseInt(report.forecast_window || "90", 10);
