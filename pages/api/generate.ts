@@ -12,8 +12,8 @@ import { getFollowupPrompt } from '@/lib/prompts/getFollowupPrompt';
 import saveReport from '@/lib/save';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Only POST method allowed" });
   }
 
   const {
