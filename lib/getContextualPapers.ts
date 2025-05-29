@@ -1,5 +1,5 @@
 // lib/getContextualPapers.ts
-
+//provides background context and structural understanding for Big-Mid-Small layers.
 import { fetchOpenAlexPapers } from "@/lib/openalex";
 
 export async function getContextualPapers(
@@ -44,4 +44,4 @@ export async function getContextualPapers(
   return topPapers;
 }
 
-1234
+

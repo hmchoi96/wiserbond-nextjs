@@ -17,7 +17,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     interpretation,
     executive,
     user_email = "",
-    forecast_window = 90 // default: 90일 후 recap 예정
+    forecast_window = 90, // default: 90일 후 recap 예정
+    followup_answers = [],
+    // 👇 새로 추가된 사용자 맥락 정보
+    goal = "",
+    situation = "",
+    industry_detail = ""
   } = req.body;
 
   const now = new Date().toISOString();
@@ -38,8 +43,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       created_at: now,
       last_checked: now,
       recap_needed: false,
-      actual_outcome: null,           // 나중에 리캡 후 비교용
-      prediction_accuracy: null       // ex) 0.8 → 80% 정확도
+      actual_outcome: null,
+      prediction_accuracy: null,
+      followup_responses: JSON.stringify(followup_answers),
+      goal,
+      situation,
+      industry_detail
     }
   ]);
 

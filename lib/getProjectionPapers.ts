@@ -1,5 +1,6 @@
 // lib/getProjectionPapers.ts
-
+// getProjectionPapers() delivers forecasting-oriented insights—models, quantified risks, 
+// and scenario-based implications—to support the strategic interpretation layer only.
 import { fetchOpenAlexPapers } from "@/lib/openalex";
 
 export async function getProjectionPapers(

@@ -8,6 +8,8 @@ import { getMidPrompt } from '@/lib/prompts/getMidPrompt';
 import { getSmallPrompt } from '@/lib/prompts/getSmallPrompt';
 import { getInterpretationPrompt } from '@/lib/prompts/getInterpretationPrompt';
 import { getExecutiveSummaryPrompt } from '@/lib/prompts/getExecutiveSummaryPrompt';
+import { getFollowupPrompt } from '@/lib/prompts/getFollowupPrompt';
+import saveReport from '@/lib/save'; // ✅ 저장 모듈
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -28,14 +30,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     followup_answers = [],
     user_analysis = "",
     user_forecast = "",
-    internal_comment = ""
+    internal_comment = "",
+    user_email = ""
   } = req.body;
 
   if (!topic || !industry || !country) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Step 1: Academic Paper Fetching
+  // Step 1: Fetch Academic Papers
   const contextPapers = await getContextualPapers(topic, industry, country, subIndustry, situation, goal, followup_questions.join(" "));
   const projectionPapers = await getProjectionPapers(topic, industry, country, subIndustry, situation, goal, followup_questions.join(" "));
 
@@ -45,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const academicContext = academicSummary(contextPapers);
   const academicProjection = academicSummary(projectionPapers);
 
-  // Step 2: Shared Prompt Params
+  // Step 2: Shared Prompt Parameters
   const sharedParams = {
     topic,
     industry,
@@ -63,9 +66,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Step 3: Generate Prompts and Call GPT
   const [big, mid, small] = await Promise.all([
-    callGPT(getBigPrompt(sharedParams)),
-    callGPT(getMidPrompt(sharedParams)),
-    callGPT(getSmallPrompt(sharedParams))
+    callGPT(getBigPrompt(sharedParams), "gpt-4o"),
+    callGPT(getMidPrompt(sharedParams), "gpt-4o"),
+    callGPT(getSmallPrompt(sharedParams), "gpt-4o")
   ]);
 
   const interpretationPrompt = getInterpretationPrompt({
@@ -79,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     user_forecast
   });
 
-  const interpretation = await callGPT(interpretationPrompt);
+  const interpretation = await callGPT(interpretationPrompt, "o3");
 
   const summaryPrompt = getExecutiveSummaryPrompt({
     ...sharedParams,
@@ -89,9 +92,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     interpretation
   });
 
-  const exec_summary = await callGPT(summaryPrompt);
+  const exec_summary = await callGPT(summaryPrompt, "gpt-4o");
 
-  // Step 4: Return card-based result
+  const followupPrompt = getFollowupPrompt({
+    topic,
+    industry,
+    country,
+    subIndustry,
+    goal,
+    situation,
+    language
+  });
+
+  const followup = await callGPT(followupPrompt, "gpt-4o");
+
+  // Step 4: Save to Supabase
+  await saveReport({
+    topic,
+    industry,
+    country,
+    language,
+    current_date,
+    user_email,
+    big,
+    mid,
+    small,
+    interpretation,
+    executive: exec_summary,
+    followup_answers,
+    goal,
+    situation,
+    industry_detail: subIndustry
+  });
+
+  // Step 5: Return result to frontend
   res.status(200).json({
     cards: [
       { id: "exec_summary", title: "Executive Summary", type: "summary", content: exec_summary },
@@ -99,6 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       { id: "mid", title: "Mid Picture", type: "analysis", content: mid },
       { id: "small", title: "Small Picture", type: "news", content: small },
       { id: "interpretation", title: "Strategic Outlook", type: "insight", content: interpretation }
-    ]
+    ],
+    followup
   });
 }
