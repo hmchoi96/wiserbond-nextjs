@@ -9,7 +9,7 @@ import { getSmallPrompt } from '@/lib/prompts/getSmallPrompt';
 import { getInterpretationPrompt } from '@/lib/prompts/getInterpretationPrompt';
 import { getExecutiveSummaryPrompt } from '@/lib/prompts/getExecutiveSummaryPrompt';
 import { getFollowupPrompt } from '@/lib/prompts/getFollowupPrompt';
-import saveReport from '@/lib/save'; // ✅ 저장 모듈
+import saveReport from '@/lib/save';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -106,13 +106,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const followup = await callGPT(followupPrompt, "gpt-4o");
 
-  // Step 4: Save to Supabase
+  // Step 4: Save to Supabase (uses current_date in DB)
   await saveReport({
     topic,
     industry,
     country,
     language,
-    current_date,
+    current_date, // ✅ 실제로 전달
     user_email,
     big,
     mid,

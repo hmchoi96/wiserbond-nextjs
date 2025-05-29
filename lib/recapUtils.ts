@@ -16,7 +16,8 @@ export function shouldRecap(report: Report): boolean {
   return daysSince >= forecastWindow;
 }
 
-export async function fetchActualOutcome(topic: string, country: string): Promise<number | null> {
+// NOTE: `_country` is reserved for future use (e.g., region-specific series ID mapping)
+export async function fetchActualOutcome(topic: string, _country?: string): Promise<number | null> {
   const topicToSeries: Record<string, string> = {
     inflation: "CPIAUCSL",
     unemployment: "UNRATE",

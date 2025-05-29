@@ -1,4 +1,5 @@
 // lib/save.ts
+
 import { supabase } from "@/lib/supabase";
 
 export default async function saveReport({
@@ -36,8 +37,6 @@ export default async function saveReport({
   situation?: string;
   industry_detail?: string;
 }) {
-  const now = new Date().toISOString();
-
   const { error } = await supabase.from("reports").insert([
     {
       topic,
@@ -51,8 +50,8 @@ export default async function saveReport({
       executive,
       user_email,
       forecast_window,
-      created_at: now,
-      last_checked: now,
+      created_at: current_date,    // ✅ 실제 사용
+      last_checked: current_date,  // ✅ 실제 사용
       recap_needed: false,
       actual_outcome: null,
       prediction_accuracy: null,
